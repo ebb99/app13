@@ -1,0 +1,171 @@
+
+        body {
+            font-family: Arial, sans-serif;
+            padding: 16px;
+            max-width: 520px;
+            margin: auto;
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 12px;
+            display: block;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            margin-top: 6px;
+        }
+
+        .tore {
+            display: flex;
+            gap: 10px;
+        }
+
+        .tore input {
+            text-align: center;
+            font-size: 22px;
+        }
+
+        button {
+            display: inline-block;
+            width: auto;
+            margin-top: 0px;
+            padding: 10px 20px;
+            background: #0011ff;
+            color: white;
+            border: none;
+
+
+            border-radius: 6px;
+        }
+
+        #meldung {
+            margin-top: 12px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Tipps */
+        .spiel {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            padding: 12px;
+        }
+
+        .spiel h3 {
+            margin: 0 0 6px 0;
+        }
+
+        .status {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+.team-logo {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    vertical-align: middle;
+    margin-right: 6px;
+}
+
+.tipp {
+  display: flex;
+  gap: 20px; /* Abstand zwischen den Spalten */
+  border-bottom: 1px solid #ccc; /* Optional: Trennlinie */
+  padding: 5px 0;
+}
+
+/* Alle Spalten standardmäßig links */
+.tipp span {
+  flex: 1;          /* Alle Spalten sind gleich breit */
+  text-align: left; 
+}
+
+/* Nur die 2. und 3. Spalte rechtsbündig */
+.tipp span:nth-child(2),
+.tipp span:nth-child(3) {
+  text-align: right;
+}
+
+.tipp span:nth-child(1) { flex: 2; } /* Name bekommt mehr Platz */
+.tipp span:nth-child(2) { flex: 1; } /* Tipp-Ergebnis */
+.tipp span:nth-child(3) { flex: 1; } /* Punkte */
+
+.tippInput {
+  width: 50px;
+  text-align: center;
+  font-size: 18px;
+  padding: 4px;
+}
+
+
+
+
+
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px;
+            text-align: center;
+        }
+        #top2 {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-evenly;
+            align-items: center;
+        }
+        .ueberschrift {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start; /* Alle Elemente starten ganz links */
+            gap: 20px;                   /* Definierter Abstand zwischen den Elementen */
+            align-items: center;
+        }
+        .ueberschrift,button {
+            margin-bottom: -10px;
+        }   
+        #saveAllTips {
+          margin-top: 10px;
+        }
+        td img {
+        vertical-align: middle;
+        margin-right: 2px;  
+        width:30px;
+        height:auto;
+        }
+
+.status-geplant {
+    color: green;
+    font-weight: bold;
+}
+
+.status-live {
+    color: red;
+    font-weight: bold;
+}
+
+.status-beendet {
+    color: blue;
+    font-weight: bold;
+}
+
+.status-ausgewertet {
+    color: black;
+    font-weight: bold;
+}

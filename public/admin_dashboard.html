@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Administrator Dashboard</title>
+    <link rel="stylesheet" href="admin_dashboard.css">
+    <script src="/auth.js"></script>
+    <script src="/admin_dashboard.js"></script>
+</head>
+
+<body>
+<header>
+    <h1>Administrator Dashboard app12</h1>
+    <button id="logoutBtn">Logout</button>
+<button onclick="window.location.href='admin-ergebnisse.html'">
+    Ergebnisse bearbeiten
+</button>
+
+<div id="meldung" class="form-control"></div>
+
+</header>
+
+
+
+<main>
+
+    <section id="spalte2">
+        <h2>Vereine</h2>
+
+    <div class="zeile1">
+        <input type="text" id="vereinInput" placeholder="Vereinsname neu...">
+        <button id="saveVerein">Speichern</button>
+    </div>
+
+    <div class="zeile1">
+        <input type="text" id="logoInput" class="form-control" placeholder="Quellcode / URL des Logos eingeben:">
+    </div>
+
+    <div class="zeile1">
+        <p>Alle Vereine:</p>
+         <select  id="allevereine" placeholder="alle Vereine"></select>
+    </div>
+
+    <div class="zeile1">
+        <input list="vereineList" id="vereineselect" placeholder="Verein suchen...">
+        <datalist id="vereineList"></datalist>
+        <button id="deleteVerein">Löschen</button>
+    </div>
+
+
+
+  <h2>Gruppen</h2>
+     </div class=zeile1">
+        <input type="text" id="gruppeInput"  placeholder="Gruppenname neu....">
+        <button id="saveGruppe">Gruppe speichern</button>
+    </div>
+
+    <div class="zeile1">
+        <p>Alle Gruppen:</p>
+        <select abc  id="allegruppen" placeholder="alle Spielgruppen"></select>
+    </div>
+
+    <div class="zeile1">
+        <input list="gruppenliste" id="gruppenSelect" placeholder="Gruppe zum Löschen wählen">
+        <datalist id="gruppenliste"></datalist>
+        <button id="deleteGruppe">Gruppe löschen</button>
+    </div>
+    
+    </section>
+
+    <section id="spalte3">
+        <h2>Spiel anlegen</h2>
+
+        <div class="spiel-zeile">
+            <select class="form-control" id="gruppeSelect" placeholder="Spielgruppe"></select>
+            <input type="datetime-local" id="anstosszeitInput" class="form-control" placeholder="Anstoßzeit">
+            <input list="vereineList" id="heimInput" placeholder="Verein suchen...">
+            <input list="vereineList" id="gastInput" placeholder="Verein suchen...">
+            <button id="saveSpiel">Spiel anlegen</button>
+        </div>
+        <hr>
+
+   
+    <h2>Spiele Übersicht</h2>
+
+    <div class="spiel-zeile">  
+        <select id="spieleSelect" class ="spiel-zeile"></select>
+        <button id="deleteSpiel">Spiel löschen</button>
+    </div>
+</section>
+
+<section id="spalte4">      
+
+<h2>Benutzerverwaltung</h2>
+<form id="userForm">
+    <input type="text" id="userName" class="zeile1" placeholder="Name" required>
+    <input type="password" id="userPassword" class="zeile1" placeholder="Passwort" required>
+    <div class="zeile1">
+    <select id="userRole" >
+        <option value="tipper">Tipper</option>
+        <option value="admin">Admin</option>
+    </select>
+
+    <button type="submit">Benutzer anlegen</button>
+    </div>
+    
+</form>
+
+
+<table border="0">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Rolle</th>
+            <th>Aktion</th>
+        </tr>
+    </thead>
+    <tbody id="userTable"></tbody>
+</table>
+    </section>
+
+<section id="spalte5">
+<h2>Reserve</h2>
+</section>
+
+
+
+</main>

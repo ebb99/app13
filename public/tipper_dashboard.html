@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tippen & Rangliste</title>
+    <link rel="stylesheet" href="tipper_dashboard.css">
+    <script src="/auth.js"></script>
+    <script src="tipper_dashboard.js"></script>
+ </head>
+
+<body>
+<main>
+<!-- ===================== -->
+<!-- TIPP ABGEBEN -->
+<!-- ===================== -->
+ 
+<div id="testmeldung">
+  
+</div>
+ 
+  
+<div id="top2">
+    <h2>Hallo  <span id="benutzername"></span>!</h2>
+    <button id="logoutBtn">Logout</button>
+    <!-- <button id="tipper_spieleBtn">zur Spielübersicht</button> -->
+</div>
+
+
+<h2>⚽ Spiele tippen/Tips korrigieren</h2>
+
+<!-- =====================
+    
+<select id="spieleSelect"> aaa</select>
+ -->
+
+<table border="1" width="100%">
+    <tbody id="tipTabelle"></tbody>
+</table>
+<!--
+<p>--</p>
+-->
+<button id="saveAllTips">💾 Alle Tipps speichern</button>
+
+<div id="meldung"></div>
+
+<h2>🏆 Rangliste</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Platz</th>
+            <th>Name</th>
+            <th>Punkte / Anzahl Tipps</th>
+        </tr>
+    </thead>
+    <tbody id="ranglisteBody"></tbody>
+</table>
+<!-- ===================== 
+<table border="1" width="100%">
+    <thead>
+        <tr>
+            <th>Datum</th>
+            <th>Heim</th>
+            <th>Gast</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody id="spieleBody"></tbody>
+</table>
+-->
+<h2>📋 Alle Tipps</h2>
+<div id="tipListe"></div>
+
+<hr>
+</main>
+<footer>
+    <p>© 2026 Eduard Ballweg. Diese Website ist ein privates, nicht kommerzielles Projekt im Rahmen eines Fußball-Tippspiels.</p>   
+    <a href="impressum_datenschutz.html">Impressum & Datenschutz</a>
+</footer>
+</body>
+</html>

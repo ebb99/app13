@@ -1,0 +1,204 @@
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* Grid-Zuordnung */
+header {
+
+  background: white;
+  color: rgb(20, 37, 53);
+  border-style:  solid;
+  /* padding: 1rem; */
+  width:auto
+}
+
+
+
+main {
+  grid-area: main;
+  display: grid;
+  /* grid-template-columns:minmax(100px, 1fr) 2.0fr 1.0fr 1.0fr ; */
+  grid-template-columns: 25% 45% 20% 10% ;
+   gap: 0.2rem;
+
+  
+  background: #eee;
+    padding: 1rem;
+}
+
+button {
+  background: blue;
+  color: white;
+  border-style:  solid;
+  border-color: white;
+  padding: 0.5rem;
+  height: 40px;
+  width:fit-content;
+  margin-bottom: 10px;
+}
+h2{
+  color: rgb(20, 37, 53);
+  font-size: 1.5rem;
+}
+
+td {
+  background: white;
+  /* display: flex; */
+  justify-content: center; /* horizontal */
+  /* align-items: center;     vertikal */
+  /* text-align: center; */
+  padding: 0.2rem;
+  margin-right: 20px;
+}
+
+
+ /* select {
+  background: rgb(233, 229, 229);
+  border-style:  solid;
+  border-color: rgb(127, 141, 221);
+  /* padding: 0.5rem;
+  margin-bottom: 1rem;  
+  } */
+
+  
+#spalte1 {
+  background: white;
+  border-style: solid;
+  border-color: red;
+  text-align: center;
+  padding: 0.2rem;
+} 
+  
+#spalte2 {
+  background: white;
+  border-style: solid;
+  border-color: red;
+  text-align: center;
+  padding: 0.2rem;
+}
+#spalte3 {
+  background: white;
+  border-style: solid;
+  border-color: red;
+  text-align: center;
+  padding: 0.2rem;
+  /* align-items: center; */
+}
+#spalte4
+ {
+  background: white;
+  border-style: solid;
+  border-color: red;
+  text-align: center;
+  padding: 0.2rem;
+}
+#spalte5
+ {
+  background: white;
+  border-style: solid;
+  border-color: red;
+  text-align: center;
+  padding: 0.5rem;
+} 
+
+.spiel-zeile{
+    /* display: flex; */
+    gap: 10px;          /* Abstand zwischen Feldern */
+    align-items:  center;
+  
+}
+
+.spiel-zeile select,
+.spiel-zeile input
+{
+    /* flex: 1;             alle gleich breit */
+    height: 32px;
+    box-sizing: border-box;
+}
+
+.spiel-zeile button{
+    flex: 0 0 140px;
+}
+
+
+
+.zeile1 {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 10px;
+  align-items: center;
+ 
+}
+
+#vereinInput  {
+  background: white;
+  border-style: solid;
+  border-color: rgb(127, 141, 221);
+  height: 30px;
+  width: 180px;
+}
+
+
+#logoInput {
+  background: white;
+  border-style: solid;
+  border-color: rgb(127, 141, 221);
+  width: 100%;
+  height: 30px;
+}
+
+#allevereine {
+  background: white;
+  border-style: solid;
+  border-color: rgb(127, 141, 221);
+  width: 60%;
+  height: 35px;
+}
+
+#vereineselect {
+  background: white;
+  border-style: solid;
+  border-color: rgb(127, 141, 221);
+  width: 60%;
+  height: 35px;
+}
+
+#gruppeInput {
+  background: white;
+  border-style: solid;
+  border-color: rgb(127, 141, 221);
+  width: 60%;
+  height: 35px;
+}
+
+#allegruppen {
+  background: white;
+  border-style: solid;
+  border-color: rgb(127, 141, 221);
+  width: 60%;
+  height: 35px;
+}
+
+#gruppenSelect {
+  background: white;
+  border-style: solid;
+  border-color: rgb(127, 141, 221);
+  width: 60%;
+  height: 35px;
+}
+
+#userName,#userPassword,#userRole {
+  background: white;
+  border-style: solid;
+  border-color: rgb(127, 141, 221);
+  width: 60%;
+  height: 25px;
+  margin-bottom: 10px;
+}
+
+
+
+
+
+
