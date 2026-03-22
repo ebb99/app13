@@ -93,17 +93,19 @@
 
 <h2>Benutzerverwaltung</h2>
 <form id="userForm">
-    <input type="text" id="userName" class="zeile1" placeholder="Name" required>
-    <input type="password" id="userPassword" class="zeile1" placeholder="Passwort" required>
-    <div class="zeile1">
-    <select id="userRole" >
-        <option value="tipper">Tipper</option>
-        <option value="admin">Admin</option>
-    </select>
+    <input type="hidden" id="userId">
 
-    <button type="submit">Benutzer anlegen</button>
-    </div>
+    <input id="userName" placeholder="Name">
+    <input id="userPassword" type="password" placeholder="Passwort">
     
+<select id="userRole">
+    <option value="tipper">Tipper</option>
+    <option value="admin">Admin</option>
+    <option value="familie">Familie</option>
+    <option value="freund">Freund</option>
+</select>
+
+    <button type="submit">Speichern</button>
 </form>
 
 
