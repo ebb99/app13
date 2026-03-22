@@ -674,6 +674,29 @@ app.post("/api/users", requireAdmin, async (req, res) => {
     res.json(result.rows[0]);
 });
 
+app.put("/api/users/:id", async (req, res) => {
+    const { id } = req.params;
+    const { name, password, role } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    if (!name || !password) {
+        return res.status(400).send("Name und Passwort erforderlich");
+    }
+
+    try {
+        // Beispiel SQL (anpassen an dein DB-System)
+        await pool.query(
+            "UPDATE users SET name = $1, password = $2, role = $3 WHERE id = $4",
+            [name, hashedPassword, role, id]
+        );
+
+        res.sendStatus(200);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Fehler beim Aktualisieren");
+    }
+});
+
 
 app.delete("/api/users/:id", requireAdmin, async (req, res) => {
     await pool.query("DELETE FROM users WHERE id=$1", [req.params.id]);
