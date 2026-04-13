@@ -27,8 +27,8 @@ const PORT = process.env.PORT || 8080;
 // ===============================
 // Konstanten
 // ===============================
-const SPIELZEIT_MINUTEN = 90;
-const NACHSPIELZEIT_MINUTEN = 30;
+const SPIELZEIT_MINUTEN = 1;
+const NACHSPIELZEIT_MINUTEN = 0;
 
 // ===============================
 // Middleware
@@ -702,24 +702,6 @@ app.delete("/api/users/:id", requireAdmin, async (req, res) => {
     await pool.query("DELETE FROM users WHERE id=$1", [req.params.id]);
     res.json({ success: true });
 });
-
-// app.get("/api/rangliste", requireLogin, async (req, res) => {
-//     const result = await pool.query(`
-//   SELECT
-//     u.id,
-//     u.name,
-//     COALESCE(SUM(t.punkte), 0) AS punkte,
-//     COUNT(t.id) AS tipps_anzahl
-// FROM users u
-// LEFT JOIN tips t ON t.user_id = u.id
-// GROUP BY u.id, u.name
-// ORDER BY punkte DESC, u.name
-//     `);
-//     res.json(result.rows);
-// });
-
-// const HOST = '0.0.0.0'; // Lausche auf allen verfügbaren Netzwerkschnittstellen
-
 
 // ===============================
 // Start

@@ -39,7 +39,24 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     // 🔀 Redirect
     if (session.user.role === "admin") {
         window.location.href = "/admin_dashboard.html";
+    end
     } else {
         window.location.href = "/tipper_spiele.html";
     }
+
+
+
+if (session.user.role === "admin") {
+  window.location.href = "/admin_dashboard.html";
+} else if (session.user.role === "familie") {
+   window.location.href = "/familie.html";
+} else {
+  window.location.href = "/tipper_spiele.html";
+}
+
+
+
+
+
+
 });

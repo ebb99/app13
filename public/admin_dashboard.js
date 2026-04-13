@@ -20,6 +20,7 @@ async function api(url, options = {}) {
 function $(id) {
     return document.getElementById(id);
 }
+
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function speicherProzess() {
@@ -31,8 +32,6 @@ async function speicherProzess() {
 
     $("meldung").textContent = "";
 }
-
-
 
 
 
@@ -59,13 +58,8 @@ document.addEventListener("DOMContentLoaded", () => {
     $("saveSpiel")?.addEventListener("click", spielSpeichern);
     $("deleteSpiel")?.addEventListener("click", spielLoeschen);
     $("saveErgebnis")?.addEventListener("click", ergebnisSpeichernUndAuswerten);
-    $("userForm")?.addEventListener("submit", userAnlegen);
-
-    // const gr = document.getElementById("gruppeSelect");
-    // console.log("Gruppe select:", gr);
-
-    // const heimverein = document.getElementById("heimSelect");
-    // console.log("Heimverein select:", heimverein);
+    $("userForm").addEventListener("submit", userSpeichern);
+   
 
 });
 // ===============================
@@ -218,15 +212,6 @@ async function vereinLoeschen() {
 }
 
 
-
-// async function vereinLoeschen() {
-//     const id = $("vereineSelect").value;
-//     if (!id) return;
-
-//     await api(`/api/vereine/${id}`, { method: "DELETE" });
-//     ladeVereine();
-// }
-
 // ===============================
 // Spiele
 // ===============================
@@ -307,13 +292,6 @@ console.log({
 }
 
 
-//   speicherProzess();
-
-    // alert("✅ Spiel gespeichert");
-    // alert(heimVerein.url);
-    
-
-
 
 async function spielLoeschen() {
     const id = $("spieleSelect").value;
@@ -361,9 +339,8 @@ async function ladeUser() {
         }
 
         const users = await res.json();
-        // console.log("👤 USERS:", users);
 
-        const tbody = document.getElementById("userTable");
+        const tbody = $("userTable");
         tbody.innerHTML = "";
 
         users.forEach(u => {
@@ -373,17 +350,29 @@ async function ladeUser() {
                 <td>${u.name}</td>
                 <td>${u.role}</td>
                 <td>
-                    <button data-id="${u.id}">Löschen</button>
+                    <button class="editBtn">Bearbeiten</button>
+                    <button class="deleteBtn">Löschen</button>
                 </td>
             `;
 
-            tr.querySelector("button").addEventListener("click", async () => {
+            // ✏️ Bearbeiten
+            tr.querySelector(".editBtn").addEventListener("click", () => {
+                userBearbeiten(u);
+            });
+
+            // 🗑️ Löschen
+            tr.querySelector(".deleteBtn").addEventListener("click", async () => {
                 if (!confirm(`User ${u.name} löschen?`)) return;
 
-                await fetch(`/api/users/${u.id}`, {
+                const delRes = await fetch(`/api/users/${u.id}`, {
                     method: "DELETE",
                     credentials: "include"
                 });
+
+                if (!delRes.ok) {
+                    alert("Fehler beim Löschen");
+                    return;
+                }
 
                 ladeUser();
             });
@@ -424,6 +413,87 @@ async function userAnlegen(e) {
     $("userForm").reset();
     ladeUser();
 }
+
+function userFormReset() {
+    $("userForm").reset();
+    $("userId").value = "";
+}
+
+function userBearbeiten(u) {
+    $("userId").value = u.id;
+    $("userName").value = u.name;
+    $("userRole").value = u.role;
+
+    $("userPassword").value = ""; // wichtig!
+}
+
+async function userAendern(e) {
+    e.preventDefault();
+
+    const id = $("userId").value;        // wichtig: bestehende ID
+    const name = $("userName").value.trim();
+    const password = $("userPassword").value;
+
+    if (!id || !name) {
+        return alert("ID und Name erforderlich");
+    }
+
+    const res = await fetch(`/api/users/${id}`, {
+        method: "PUT", // oder "PATCH" je nach API
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, password })
+    });
+
+    if (!res.ok) {
+        const t = await res.text();
+        alert("Fehler: " + t);
+        return;
+    }
+
+    $("userForm").reset();
+    ladeUser();
+}
+
+async function userSpeichern(e) {
+    e.preventDefault();
+
+    const id = $("userId").value;
+    const name = $("userName").value.trim();
+    const password = $("userPassword").value;
+    const role = $("userRole").value;
+
+    if (!name) {
+        return alert("Name erforderlich");
+    }
+
+    const body = {
+        name,
+        role,
+        password // ⚠️ wird bewusst IMMER überschrieben
+    };
+
+    const url = id ? `/api/users/${id}` : "/api/users";
+    const method = id ? "PUT" : "POST";
+
+    const res = await fetch(url, {
+        method,
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+    });
+
+    if (!res.ok) {
+        const t = await res.text();
+        alert("Fehler: " + t);
+        return;
+    }
+
+    userFormReset();
+    ladeUser();
+}
+
+
 
 
 
