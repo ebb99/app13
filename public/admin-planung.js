@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // await ladeTipps();
         // await ladeRangliste();
         await lade_planung();
-        await planung_neu();
+        // $("Button1")?.addEventListener("click", planung_neu);
        // $("saveAllTips").addEventListener("click", tippSpeichern);
         // $("logoutBtn")?.addEventListener("click", logout);
         // $("tipper_spieleBtn")?.addEventListener("click", () => {
@@ -62,6 +62,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         location.href = "/";
     }
 });
+
+async function runPython() {
+    await fetch("http://localhost:8080/run-python");
+    alert("Eintrag erstellt");
+}
+
 
 async function lade_planung() {
     // const res = await fetch("/api/spiele/planung");
