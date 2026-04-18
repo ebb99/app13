@@ -14,6 +14,7 @@
     <h1>Planung app13</h1>
 <div class="button-container">
     <button id ="Button1" onclick="planung_neu()">Planung neu</button>
+    <button onclick="runPython()">Eintrag erstellen</button>
     <button id ="Button2" onclick="window.location.href='admin_dashboard.html'">zurück zum admin dashboard</button>
     <button id ="Button3" onclick="window.location.href='index.html'">zurück zum Login</button>
  
@@ -28,11 +29,11 @@
     <thead>
         <tr>
             <th>ID</th>
-            <th>Anstoß</th>
+            <th>Datum</th>
+            <th>Uhrzeit</th>
             <th>Heim</th>
             <th>Gast</th>
-            <th>Tore Heim</th>
-            <th>Tore Gast</th>
+            <th>Kennung</th>
         </tr>
     </thead>
     <tbody id="planTable"></tbody>
