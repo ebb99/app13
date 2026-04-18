@@ -1,6 +1,10 @@
+from fastapi import FastAPI
 import psycopg2
 import os
 
+app = FastAPI()
+
+@app.get("/run-job")
 def run_job():
     try:
         conn = psycopg2.connect(os.environ["DATABASE_URL"])
@@ -12,12 +16,7 @@ def run_job():
         cur.close()
         conn.close()
 
-        return "OK"
+        return {"status": "ok"}
 
     except Exception as e:
-        print("Fehler:", e)
-        return "ERROR"
-
-
-if __name__ == "__main__":
-    run_job()
+        return {"error": str(e)}
