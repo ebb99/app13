@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Planung</title>
+    <link rel="stylesheet" href="admin-planung.css">
+    <script src="/auth.js"></script>
+    <script src="/admin-planung.js"></script>
+</head>
+
+<body>
+    
+<header>
+    <h1>Planung app13</h1>
+<div class="button-container">
+    <button id ="Button1" onclick="planung_neu()">Planung neu</button>
+    <button id ="Button2" onclick="window.location.href='admin_dashboard.html'">zurück zum admin dashboard</button>
+    <button id ="Button3" onclick="window.location.href='index.html'">zurück zum Login</button>
+ 
+    <p id="msg"> Meldungen</p>
+</div>
+</header>
+
+
+<h2>Planung</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Anstoß</th>
+            <th>Heim</th>
+            <th>Gast</th>
+            <th>Tore Heim</th>
+            <th>Tore Gast</th>
+        </tr>
+    </thead>
+    <tbody id="planTable"></tbody>
+</table>
+
+

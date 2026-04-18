@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
     $("deleteSpiel")?.addEventListener("click", spielLoeschen);
     $("saveErgebnis")?.addEventListener("click", ergebnisSpeichernUndAuswerten);
     $("userForm").addEventListener("submit", userSpeichern);
-   
+    $("planung")?.addEventListener("click", load_planung);
 
 });
 // ===============================
