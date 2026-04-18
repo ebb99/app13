@@ -11,6 +11,9 @@ console.log("ENV CHECK:", process.env.DATABASE_URL);
 // Imports
 // ===============================
 const express = require("express");
+
+const { exec } = require("child_process");
+
 const pg = require("pg");
 const path = require("path");
 const cron = require("node-cron");
@@ -130,6 +133,12 @@ cron.schedule("* * * * *", async () => {
 });
 
 
+
+
+
+
+
+
 // ===============================
 // Session / Auth API
 // ===============================
@@ -173,6 +182,24 @@ app.post("/api/logout", (req, res) => {
 app.get("/api/session", (req, res) => {
     res.json({ user: req.session.user || null });
 });
+
+app.get("/run-python", (req, res) => {
+    const scriptPath = path.join(__dirname, "python-service", "main.py");
+
+    exec(`python "${scriptPath}"`, (error, stdout, stderr) => {
+        if (error) {
+            console.error(error);
+            return res.status(500).send("Fehler");
+        }
+
+        console.log(stdout);
+        res.send("Python Script ausgeführt");
+    });
+});
+
+
+
+
 
 
 
