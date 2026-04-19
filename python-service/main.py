@@ -1,9 +1,3 @@
-from fastapi import FastAPI
-import psycopg2
-import os
-
-app = FastAPI()
-
 @app.get("/run-job")
 def run_job():
     try:
@@ -19,4 +13,5 @@ def run_job():
         return {"status": "ok"}
 
     except Exception as e:
-        return {"error": str(e)}
+        print("FEHLER:", e)
+        return {"status": "error", "message": str(e)}
