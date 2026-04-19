@@ -186,7 +186,8 @@ app.get("/api/session", (req, res) => {
 
 app.get("/start-python", async (req, res) => {
     try {
-        const response = await fetch(process.env.PYTHON_SERVICE_URL + "/run-job");
+        // const response = await fetch(process.env.PYTHON_SERVICE_URL + "/run-job");
+        const response = await fetch("http://python-worker.railway.internal/run-job");
         const data = await response.json();
 
         res.json(data); // 🔥 wichtig!
