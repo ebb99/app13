@@ -205,7 +205,26 @@ app.get("/start-python", async (req, res) => {
     }
 });
 
+app.get("/api/spiele/planung", async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT
+                id,
+                datum,
+                zeit,
+                heimverein ,
+                gastverein
+                FROM spiele_web
+                ORDER BY datum ASC
+        `);
 
+        res.json(result.rows);
+
+    } catch (err) {
+        console.error("Fehler beim Laden der geplanten Spiele:", err);
+        res.status(500).json({ error: "Fehler beim Laden der Daten" });
+    }
+});
 
 
 
