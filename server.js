@@ -32,7 +32,7 @@ const PORT = process.env.PORT || 8080;
 // ===============================
 const SPIELZEIT_MINUTEN = 1;
 const NACHSPIELZEIT_MINUTEN = 0;
-
+const PYTHON_SERVICE_URL = "http://python-worker.railway.internal";
 // ===============================
 // Middleware
 // ===============================
@@ -186,9 +186,9 @@ app.get("/api/session", (req, res) => {
 
 app.get("/start-python", async (req, res) => {
     try {
-        // const response = await fetch(process.env.PYTHON_SERVICE_URL + "/run-job");
+        const response = await fetch(process.env.PYTHON_SERVICE_URL + "/run-job");
         // const response = await fetch(process.env.AMUSING_HEART_PRODUCTION_4BF6_UP_RAILWAY_APP + "/run-job");
-            const response = await fetch("https://amusing-heart.railway.internal/run-job");
+            // const response = await fetch("http://python-worker.railway.internal/run-job");
         const data = await response.json();
 
         res.json(data); // 🔥 wichtig!
