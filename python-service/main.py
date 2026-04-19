@@ -1,6 +1,5 @@
 from fastapi import FastAPI
-import psycopg2
-from psycopg2 import pool
+import asyncpg
 import os
 
 app = FastAPI()
@@ -8,41 +7,29 @@ app = FastAPI()
 db_pool = None
 
 @app.on_event("startup")
-def startup():
+async def startup():
     global db_pool
-    db_pool = psycopg2.pool.SimpleConnectionPool(
-        minconn=1,
-        maxconn=5,
+    db_pool = await asyncpg.create_pool(
         dsn=os.environ["DATABASE_URL"],
-        sslmode="require"
+        min_size=1,
+        max_size=5,
+        ssl="require"
     )
 
 @app.on_event("shutdown")
-def shutdown():
-    global db_pool
-    if db_pool:
-        db_pool.closeall()
+async def shutdown():
+    await db_pool.close()
 
 @app.post("/run-job")
-def run_job():
-    conn = None
+async def run_job():
     try:
-        conn = db_pool.getconn()
-        cur = conn.cursor()
-
-        cur.execute("INSERT INTO spiele_web (created_at) VALUES (NOW())")
-        conn.commit()
-
-        cur.close()
+        async with db_pool.acquire() as conn:
+            await conn.execute(
+                "INSERT INTO spiele_web (created_at) VALUES (NOW())"
+            )
 
         return {"status": "ok"}
 
     except Exception as e:
-        if conn:
-            conn.rollback()
         print("FEHLER:", e)
         return {"status": "error", "message": str(e)}
-
-    finally:
-        if conn:
-            db_pool.putconn(conn)
