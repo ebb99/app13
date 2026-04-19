@@ -1,3 +1,9 @@
+from fastapi import FastAPI
+import psycopg2
+import os
+
+app = FastAPI()
+
 @app.get("/run-job")
 def run_job():
     try:
