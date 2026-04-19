@@ -188,7 +188,8 @@ app.get("/start-python", async (req, res) => {
     try {
         // const response = await fetch(process.env.PYTHON_SERVICE_URL + "/run-job");
         // const response = await fetch(process.env.AMUSING_HEART_PRODUCTION_4BF6_UP_RAILWAY_APP + "/run-job");
-            const response = await fetch("http://python-worker.railway.internal/run-job");
+            // const response = await fetch("http://python-worker.railway.internal/run-job");
+            const response = await fetch("https://amusing-heart-production-4bf6.up.railway.app/run-job")
         const data = await response.json();
 
         res.json(data); // 🔥 wichtig!
