@@ -183,20 +183,21 @@ app.get("/api/session", (req, res) => {
     res.json({ user: req.session.user || null });
 });
 
-app.get("/run-python", (req, res) => {
-    const scriptPath = path.join(__dirname, "python-service", "main.py");
 
-    exec(`python "${scriptPath}"`, (error, stdout, stderr) => {
-        if (error) {
-            console.error(error);
-            return res.status(500).send("Fehler");
-        }
+app.get("/start-python", async (req, res) => {
+    try {
+        const response = await fetch(process.env.PYTHON_SERVICE_URL + "/run-job");
+        const data = await response.json();
 
-        console.log(stdout);
-        res.send("Python Script ausgeführt");
-    });
+        res.json(data); // 🔥 wichtig!
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            status: "error",
+            message: "Node konnte Python nicht erreichen"
+        });
+    }
 });
-
 
 
 

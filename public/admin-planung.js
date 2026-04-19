@@ -64,10 +64,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function runPython() {
-    await fetch("http://localhost:8080/run-python");
-    alert("Eintrag erstellt");
-}
+    const resultEl = document.getElementById("result");
+    resultEl.innerText = "Lädt...";
 
+    try {
+        const res = await fetch("/start-python");
+        const data = await res.json();
+
+        if (data.status === "ok") {
+            resultEl.innerText = "✅ Erfolgreich!";
+        } else {
+            resultEl.innerText = "❌ Fehler: " + data.message;
+        }
+
+    } catch (err) {
+        resultEl.innerText = "❌ Netzwerkfehler";
+    }
+}
 
 async function lade_planung() {
     // const res = await fetch("/api/spiele/planung");
