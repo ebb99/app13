@@ -88,7 +88,10 @@ async function lade_planung() {
 
     const tbody = document.getElementById("planTable");
     tbody.innerHTML = "";
-    alert("Planung laden später")
+
+    // alert("Planung laden später")
+
+
     // spiele.forEach(s => {
     //     tbody.innerHTML += `
     //         <tr>
