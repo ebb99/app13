@@ -109,17 +109,19 @@ async function lade_planung() {
     tbody.innerHTML = "";
 
     spiele.forEach(s => {
-        tbody.innerHTML += `
-            <tr>
-                <td>${s.id}</td>
-                <td>${s.datum}</td>
-                <td>${s.zeit}</td>
-                <td>${s.heimverein}</td>
-                <td>${s.gastverein}</td>
-   
-            </tr>
-        `;
-    });
+            tbody.innerHTML += `
+                <tr>
+                    <td>${s.id}</td>
+                    <td>${s.datum}</td>
+                    <td>${s.zeit}</td>
+                    <td>${s.heimverein}</td>
+                    <td>${s.gastverein}</td>
+                    <td>${s.score}</td>
+                    <td><input type="checkbox" class="spiel-checkbox" data-id="${s.id}"></td>
+    
+                </tr>
+            `;
+        });    
 }
 async function planung_neu() {
     // const res = await fetch("/api/spiele/planung");

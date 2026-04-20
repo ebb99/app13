@@ -213,7 +213,8 @@ app.get("/api/spiele/planung", async (req, res) => {
                 datum,
                 zeit,
                 heimverein ,
-                gastverein
+                gastverein,
+                score   
                 FROM spiele_web
                 ORDER BY datum ASC
         `);
