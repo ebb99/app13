@@ -30,8 +30,8 @@ const PORT = process.env.PORT || 8080;
 // ===============================
 // Konstanten
 // ===============================
-const SPIELZEIT_MINUTEN = 1;
-const NACHSPIELZEIT_MINUTEN = 0;
+const SPIELZEIT_MINUTEN = 90;
+const NACHSPIELZEIT_MINUTEN = 30;
 const PYTHON_SERVICE_URL = "http://python-worker.railway.internal";
 // ===============================
 // Middleware
