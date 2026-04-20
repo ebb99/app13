@@ -82,25 +82,6 @@ async function runPython() {
     }
 }
 
-// async function ladeRangliste() {
-//     const daten = await api("/api/rangliste");
-
-//     const tbody = $("ranglisteBody");
-//     tbody.innerHTML = "";
-
-//     daten.forEach((u, i) => {
-//         tbody.innerHTML += `
-//             <tr>
-//                 <td>${i + 1}</td>
-//                 <td>${u.name}</td>
-//                 <td>tips ${u.punkte}</td>
-
-//             </tr>
-//         `;
-//     });
-// }
-
-
 async function lade_planung() {
     const res = await fetch("/api/spiele/planung");
     spiele = await res.json();

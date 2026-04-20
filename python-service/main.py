@@ -1,6 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI,BackgroundTasks
 import asyncpg
 import os
+from scraper import run_scraper
 
 app = FastAPI()
 
@@ -21,14 +22,10 @@ async def shutdown():
     await db_pool.close()
 
 @app.post("/run-job")
-async def run_job():
+async def run_job(background_tasks: BackgroundTasks):
     try:
-        async with db_pool.acquire() as conn:
-            await conn.execute(
-                "INSERT INTO spiele_web (created_at) VALUES (NOW())"
-            )
-
-        return {"status": "ok"}
+        background_tasks.add_task(run_scraper)
+        return {"status": "scraper started"}
 
     except Exception as e:
         print("FEHLER:", e)
