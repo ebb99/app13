@@ -11,7 +11,7 @@ from tkinter import messagebox
 
 
 # railway app13_db
-conn_url="postgresql://postgres:YEcdMEdFRiQHkyEtsbBKsYdMnwrFqvcn@roundhouse.proxy.rlwy.net:20001/railway"
+conn_url="postgresql://postgres:YEcdMEdFRiQHkyEtsbBKsYdMnwrFqvcn@roundhouse.proxy.rlwy.net:20001/railway?sslmode=require"
 conn = psycopg2.connect(conn_url)
 
 # lokal:
