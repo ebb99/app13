@@ -11,18 +11,18 @@ async def run_scraper():
     from tkinter import messagebox
 
 
-    # # railway app13_db
-    # conn_url="postgresql://postgres:YEcdMEdFRiQHkyEtsbBKsYdMnwrFqvcn@roundhouse.proxy.rlwy.net:20001/railway"
-    # conn = psycopg2.connect(conn_url)
+    # railway app13_db
+    conn_url="postgresql://postgres:YEcdMEdFRiQHkyEtsbBKsYdMnwrFqvcn@roundhouse.proxy.rlwy.net:20001/railway"
+    conn = psycopg2.connect(conn_url)
 
-    # lokal:
-    conn = psycopg2.connect(
-        host="localhost",
-        port=5432,
-        database="app13_db",
-        user="postgres",
-        password="6778"
-    )
+    # # lokal:
+    # conn = psycopg2.connect(
+    #     host="localhost",
+    #     port=5432,
+    #     database="app13_db",
+    #     user="postgres",
+    #     password="6778"
+    # )
 
     cur = conn.cursor()
 
