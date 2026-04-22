@@ -68,9 +68,21 @@ async function runPython() {
     resultEl.innerText = "Lädt...";
 
     try {
-        const res = await fetch("/start-python");
+        const res = await fetch("/run-job", {
+    method: "POST"
+    });
         const data = await res.json();
+    
+console.log(res.status);
 
+const text = await res.text();   // 👈 HIER
+console.log(text);
+
+
+
+
+
+        
         console.log(data);
 
         if (data.status === "ok") {

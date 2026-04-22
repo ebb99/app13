@@ -25,7 +25,10 @@ async def shutdown():
 async def run_job(background_tasks: BackgroundTasks):
     try:
         background_tasks.add_task(run_scraper)
-        return {"status": "scraper started"}
+        return {
+            "status": "ok",
+            "message": "Scraper wurde gestartet"
+        }
 
     except Exception as e:
         print("FEHLER:", e)
