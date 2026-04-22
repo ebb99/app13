@@ -273,7 +273,7 @@ def daten_holen(von, bis):
 cur.execute("TRUNCATE TABLE spiele_web RESTART IDENTITY")
 conn.commit()
 heute = date.today()
-dat1 = heute - timedelta(days=8)
+dat1 = heute - timedelta(days=17)
 dat2 = heute + timedelta(days=8)
 query_min_max = """
     SELECT MIN(spieltag), MAX(spieltag) 
