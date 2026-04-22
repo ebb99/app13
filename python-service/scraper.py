@@ -273,9 +273,9 @@ async def run_scraper():
     # 1. spiele_web  leeren und neu füllen von bis (IDs werden zurückgesetzt)
     cur.execute("TRUNCATE TABLE spiele_web RESTART IDENTITY")
     conn.commit()
-    console.log("Tabelle spiele_web geleert. Bereite Daten vor...")
+    # console.log("Tabelle spiele_web geleert. Bereite Daten vor...")
     heute = date.today()
-    dat1 = heute - timedelta(days=8)
+    dat1 = heute - timedelta(days=17)
     dat2 = heute + timedelta(days=8)
     query_min_max = """
         SELECT MIN(spieltag), MAX(spieltag) 
