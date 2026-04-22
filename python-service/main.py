@@ -2,8 +2,16 @@ from fastapi import FastAPI,BackgroundTasks
 import asyncpg
 import os
 from scraper import run_scraper
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 db_pool = None
 

@@ -68,9 +68,15 @@ async function runPython() {
     resultEl.innerText = "Lädt...";
 
     try {
-        const res = await fetch("/run-job", {
+        const res = await fetch("https://amusing-heart-production-4bf6.up.railway.app/run-job", {
             method: "POST"
         });
+
+
+
+
+
+
 
         console.log(res.status);
 
