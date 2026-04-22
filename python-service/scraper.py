@@ -1,4 +1,16 @@
 # async def run_scraper():
+from playwright.sync_api import sync_playwright
+from bs4 import BeautifulSoup
+import re
+import time
+from datetime import date, datetime, timedelta
+import os
+import sys
+import psycopg2
+
+
+
+
 async def run_scraper(job_id=None, jobs=None):
     db_url = os.environ.get("DATABASE_URL")
 
@@ -7,16 +19,7 @@ async def run_scraper(job_id=None, jobs=None):
     if not db_url:
         raise Exception("❌ DATABASE_URL ist nicht gesetzt!")
 
-    from playwright.sync_api import sync_playwright
-    from bs4 import BeautifulSoup
-    import re
-    import time
-    from datetime import date, datetime, timedelta
-    import win32com.client
-    import os
-    import sys
-    import psycopg2
-    from tkinter import messagebox
+
 
 
     # railway app13_db
