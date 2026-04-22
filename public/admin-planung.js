@@ -71,6 +71,8 @@ async function runPython() {
         const res = await fetch("/start-python");
         const data = await res.json();
 
+        console.log(data);
+
         if (data.status === "ok") {
             resultEl.innerText = "✅ Erfolgreich!";
         } else {
