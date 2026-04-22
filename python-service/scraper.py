@@ -12,7 +12,7 @@ async def run_scraper():
 
 
     # railway app13_db
-    conn_url="postgresql://postgres:YEcdMEdFRiQHkyEtsbBKsYdMnwrFqvcn@roundhouse.proxy.rlwy.net:20001/railway"
+    conn_url="postgresql://postgres:YEcdMEdFRiQHkyEtsbBKsYdMnwrFqvcn@roundhouse.proxy.rlwy.net:20001/railway?sslmode=require"
     conn = psycopg2.connect(conn_url)
 
     # # lokal:
@@ -275,7 +275,7 @@ async def run_scraper():
     conn.commit()
     # console.log("Tabelle spiele_web geleert. Bereite Daten vor...")
     heute = date.today()
-    dat1 = heute - timedelta(days=17)
+    dat1 = heute - timedelta(days=1)
     dat2 = heute + timedelta(days=8)
     query_min_max = """
         SELECT MIN(spieltag), MAX(spieltag) 
