@@ -69,29 +69,22 @@ async function runPython() {
 
     try {
         const res = await fetch("/run-job", {
-    method: "POST"
-    });
+            method: "POST"
+        });
+
+        console.log(res.status);
+
         const data = await res.json();
-    
-console.log(res.status);
-
-const text = await res.text();   // 👈 HIER
-console.log(text);
-
-
-
-
-
-        
         console.log(data);
 
         if (data.status === "ok") {
             resultEl.innerText = "✅ Erfolgreich!";
         } else {
-            resultEl.innerText = "❌ Fehler: " + data.message;
+            resultEl.innerText = "❌ Fehler: " + (data.message || "Unbekannt");
         }
 
     } catch (err) {
+        console.error(err);
         resultEl.innerText = "❌ Netzwerkfehler";
     }
 }
