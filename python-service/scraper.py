@@ -1,5 +1,5 @@
 # async def run_scraper():
-def run_scraper(job_id=None, jobs=None):
+async def run_scraper(job_id=None, jobs=None):
     db_url = os.environ.get("DATABASE_URL")
 
     print("DATABASE_URL:", db_url)
