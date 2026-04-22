@@ -31,12 +31,11 @@ async def shutdown():
 
 @app.post("/run-job")
 async def run_job(background_tasks: BackgroundTasks):
+    print("🔥 /run-job wurde aufgerufen")
+
     try:
         background_tasks.add_task(run_scraper)
-        return {
-            "status": "ok",
-            "message": "Scraper wurde gestartet"
-        }
+        return {"status": "ok"}
 
     except Exception as e:
         print("FEHLER:", e)
