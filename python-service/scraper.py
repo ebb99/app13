@@ -1,4 +1,12 @@
-async def run_scraper():
+# async def run_scraper():
+def run_scraper(job_id=None, jobs=None):
+    db_url = os.environ.get("DATABASE_URL")
+
+    print("DATABASE_URL:", db_url)
+
+    if not db_url:
+        raise Exception("❌ DATABASE_URL ist nicht gesetzt!")
+
     from playwright.sync_api import sync_playwright
     from bs4 import BeautifulSoup
     import re
