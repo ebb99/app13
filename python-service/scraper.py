@@ -8,16 +8,13 @@ def run_scraper(job_id=None, jobs=None):
         db_url = os.environ.get("DATABASE_URL")
         print("DB URL:", db_url)
 
-        if not db_url:
-            raise Exception("❌ DATABASE_URL ist nicht gesetzt!")
-
-        conn = psycopg2.connect(db_url)
+        conn = psycopg2.connect(db_url, sslmode="require")
         cur = conn.cursor()
 
-        cur.execute("SELECT NOW();")
+        cur.execute("SELECT 1;")
         print("DB OK:", cur.fetchone())
 
         conn.close()
 
     except Exception as e:
-        print("❌ SCRAPER ERROR:", e)
+        print("❌ DB ERROR:", e)
