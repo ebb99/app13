@@ -30,28 +30,7 @@ def run_scraper(job_id=None, jobs=None):
         print("❌ DB ERROR:", e)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # # lokal:
+# # lokal:
     # conn = psycopg2.connect(
     #     host="localhost",
     #     port=5432,
