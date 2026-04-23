@@ -112,6 +112,7 @@ async function lade_planung() {
                     <td>${s.heimverein}</td>
                     <td>${s.gastverein}</td>
                     <td>${s.score}</td>
+                    <td>${s.kennung}</td>
                     <td><input type="checkbox" class="spiel-checkbox" data-id="${s.id}"></td>
     
                 </tr>

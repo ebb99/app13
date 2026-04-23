@@ -146,16 +146,15 @@ def extract_game_details(html):
     gast = soup.select_one("div.team-shortname-away")
     time_div = soup.select_one("div.match-time")
     score_div = soup.select_one("div.match-result")
-
+    kennung = extract_datum(soup)  + "_" + (heim.get_text(strip=True) if heim else "n/a") + "_"+ (gast.get_text(strip=True) if gast else "n/a")
     return {
-      "spieltag_nummer": extract_spieltag(soup),
-
+        "spieltag_nummer": extract_spieltag(soup),
         "Datum": extract_datum(soup),
-        
         "time": time_div.get_text(strip=True) if time_div else "",
         "heim": heim.get_text(strip=True) if heim else "",
         "gast": gast.get_text(strip=True) if gast else "",
-        "score": score_div.get_text(strip=True) if score_div else "n/a"
+        "score": score_div.get_text(strip=True) if score_div else "n/a",
+        "kennung": kennung
     }
 
 def extract_game_plan_details(html):
@@ -187,17 +186,18 @@ def extract_time(soup):
 def eintrag_db(cur, conn, results):
 
     for g in results:
-        print (f"💾 Eintrag: {g['spieltag_nummer']} - {g['Datum']} - {g['heim']} vs {g['gast']} - {g['score']}")
+        # print (f"💾 Eintrag: {g['spieltag_nummer']} - {g['Datum']} - {g['heim']} vs {g['gast']} - {g['score']}")
         cur.execute("""
-            INSERT INTO spiele_web (spieltag, datum, zeit, heimverein, gastverein, score)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO spiele_web (spieltag, datum, zeit, heimverein, gastverein, score,kennung)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
         """, (
             g["spieltag_nummer"],
             g["Datum"],
             g["time"],
             g["heim"],
             g["gast"],
-            g["score"]
+            g["score"],
+            g["kennung"]
         ))
 
     conn.commit()

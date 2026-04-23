@@ -98,7 +98,8 @@ CREATE TABLE spiele_web (
     zeit VARCHAR(255) NOT NULL,
     heimverein VARCHAR(255) NOT NULL,
     gastverein VARCHAR(255) NOT NULL, 
-    score  VARCHAR(255) NOT NULL
+    score  VARCHAR(255) NOT NULL,
+    kennung VARCHAR(255) NOT NULL 
 );
 """
 
