@@ -38,7 +38,7 @@ def run_scraper(job_id=None, jobs=None):
 
         # Zeitraum bestimmen
         heute = date.today()
-        dat1 = heute - timedelta(days=8)
+        dat1 = heute - timedelta(days=16)
         dat2 = heute + timedelta(days=8)
 
         cur.execute("""
