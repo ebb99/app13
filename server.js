@@ -210,6 +210,7 @@ app.get("/api/spiele/planung", async (req, res) => {
         const result = await pool.query(`
             SELECT
                 id,
+                spieltag
                 datum,
                 zeit,
                 heimverein ,
