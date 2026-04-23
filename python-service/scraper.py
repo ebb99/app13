@@ -143,6 +143,7 @@ def extract_game_details(html):
     soup = BeautifulSoup(html, "html.parser")
 
     heim = soup.select_one("div.team-name-home")
+    print ("🏠 Heimteam:", heim.get_text(strip=True) if heim else "Keins")
     gast = soup.select_one("div.team-name-away")
     time_div = soup.select_one("div.match-time")
     score_div = soup.select_one("div.match-result")
