@@ -70,6 +70,7 @@ def run_scraper(job_id=None, jobs=None):
 # DATEN HOLEN
 # =========================
 def daten_holen(cur, conn, von, bis):
+    from playwright.sync_api import sync_playwright
     base = "https://www.sportschau.de/live-und-ergebnisse/fussball/deutschland-bundesliga/se94724/2025-2026/ro262400/spieltag/md"
 
     with sync_playwright() as p:
