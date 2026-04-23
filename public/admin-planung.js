@@ -106,6 +106,7 @@ async function lade_planung() {
             tbody.innerHTML += `
                 <tr>
                     <td>${s.id}</td>
+                    <td>${s.spieltag}</td>
                     <td>${s.datum}</td>
                     <td>${s.zeit}</td>
                     <td>${s.heimverein}</td>
