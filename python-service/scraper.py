@@ -161,8 +161,8 @@ def extract_game_details(html):
 def extract_game_plan_details(html):
     soup = BeautifulSoup(html, "html.parser")
 
-    heim = soup.select_one("div.team-name-home")
-    gast = soup.select_one("div.team-name-away")
+    heim = soup.select_one("div.team-shortname-home")
+    gast = soup.select_one("div.team-shortname-away")
     time_div = soup.select_one("div.match-time")
     score_div = soup.select_one("div.match-result")
     kennung = extract_datum(soup)  + "_" + (heim.get_text(strip=True) if heim else "n/a") + "_"+ (gast.get_text(strip=True) if gast else "n/a")
