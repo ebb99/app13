@@ -185,6 +185,7 @@ def extract_datum(soup):
 def eintrag_db(cur, conn, results):
 
     for g in results:
+        print (f"💾 Eintrag: {g['spieltag_nummer']} - {g['Datum']} - {g['heim']} vs {g['gast']} - {g['score']}")
         cur.execute("""
             INSERT INTO spiele_web (spieltag, datum, zeit, heimverein, gastverein, score)
             VALUES (%s, %s, %s, %s, %s, %s)
