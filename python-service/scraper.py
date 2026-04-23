@@ -158,9 +158,35 @@ def extract_game_details(html):
     }
 
 def extract_game_plan_details(html):
-    data = extract_game_details(html)
-    data["score"] = "n/a"
-    return data
+    soup = BeautifulSoup(html, "html.parser")
+
+    heim = soup.select_one("div.team-name-home")
+    gast = soup.select_one("div.team-name-away")
+    time_div = soup.select_one("div.match-time")
+    score_div = soup.select_one("div.match-result")
+    kennung = extract_datum(soup)  + "_" + (heim.get_text(strip=True) if heim else "n/a") + "_"+ (gast.get_text(strip=True) if gast else "n/a")
+    return {
+        "spieltag_nummer": extract_spieltag(soup),
+        "Datum": extract_datum(soup),
+        "time": time_div.get_text(strip=True) if time_div else "",
+        "heim": heim.get_text(strip=True) if heim else "",
+        "gast": gast.get_text(strip=True) if gast else "",
+        "score": score_div.get_text(strip=True) if score_div else "n/a",
+        "kennung": kennung
+    }
+
+
+
+
+
+
+
+# def extract_game_plan_details(html):
+#     data = extract_game_details(html)
+#     data["score"] = "n/a"
+#     return data
+
+
 
 
 def extract_spieltag(soup):
