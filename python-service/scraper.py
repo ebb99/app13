@@ -96,7 +96,7 @@ def daten_holen(cur, conn, von, bis):
             for link in game_links:
                 page.goto(link)
                 page.wait_for_timeout(3000)
-                data = extract_game_details(spieltag,page.content())
+                data = extract_game_details(page.content())
                 results.append(data)
 
             eintrag_db(cur, conn, results)
@@ -139,7 +139,7 @@ def extract_links(html, typ):
 # =========================
 # DETAILS
 # =========================
-def extract_game_details(spieltag, html):
+def extract_game_details(html):
     soup = BeautifulSoup(html, "html.parser")
 
     heim = soup.select_one("div.team-shortname-home")
@@ -148,7 +148,7 @@ def extract_game_details(spieltag, html):
     score_div = soup.select_one("div.match-result")
 
     return {
-      "spieltag_nummer": spieltag,
+      "spieltag_nummer": extract_spieltag(soup),
 
         "Datum": extract_datum(soup),
         
@@ -157,6 +157,7 @@ def extract_game_details(spieltag, html):
         "gast": gast.get_text(strip=True) if gast else "",
         "score": score_div.get_text(strip=True) if score_div else "n/a"
     }
+
 def extract_game_plan_details(html):
     data = extract_game_details(html)
     data["score"] = "n/a"
@@ -174,7 +175,11 @@ def extract_datum(soup):
     datum_match = re.search(r"(\d{2}\.\d{2}\.\d{4})", headline_roh.text) if headline_roh else None
     # print("📅 Gefundenes Datum headline:", datum_match.group(1) if datum_match else "Keins")
     return datum_match.group(1) if datum_match else None
-
+def extract_time(soup):
+    headline_roh = soup.find("h3",class_="hs-scoreboard-headline")
+    time_match = re.search(r"(\d{2}:\d{2})", headline_roh.text) if headline_roh else None
+    # print("⏰ Gefundene Uhrzeit headline:", time_match.group(1) if time_match else "Keine")
+    return time_match.group(1) if time_match else None
 
 # =========================
 # DB INSERT
