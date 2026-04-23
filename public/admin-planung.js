@@ -117,23 +117,3 @@ async function lade_planung() {
             `;
         });    
 }
-async function planung_neu() {
-    // const res = await fetch("/api/spiele/planung");
-    // spiele = await res.json();
-
-    const tbody = document.getElementById("planTable");
-    tbody.innerHTML = "";
-    alert("Planung neu")
-    // spiele.forEach(s => {
-    //     tbody.innerHTML += `
-    //         <tr>
-    //             <td>${s.id}</td>
-    //             <td>${s.spielbeginn_formatiert}</td>
-    //             <td>${s.heim_name}</td>
-    //             <td>${s.gast_name}</td>
-    //             <td><input id="home_${s.id}" type="number" min="0" value="${s.heimtore ?? ""}"></td>
-    //             <td><input id="gast_${s.id}" type="number" min="0" value="${s.gasttore ?? ""}"></td>
-    //         </tr>
-    //     `;
-    // });
-}
