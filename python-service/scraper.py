@@ -96,7 +96,7 @@ def daten_holen(cur, conn, von, bis):
             for link in game_links:
                 page.goto(link)
                 page.wait_for_timeout(3000)
-                data = extract_game_details(page.content())
+                data = extract_game_details(spieltag,page.content())
                 results.append(data)
 
             eintrag_db(cur, conn, results)
@@ -139,7 +139,7 @@ def extract_links(html, typ):
 # =========================
 # DETAILS
 # =========================
-def extract_game_details(html):
+def extract_game_details(spieltag, html):
     soup = BeautifulSoup(html, "html.parser")
 
     heim = soup.select_one("div.team-shortname-home")
@@ -148,7 +148,8 @@ def extract_game_details(html):
     score_div = soup.select_one("div.match-result")
 
     return {
-        "spieltag_nummer": extract_spieltag(soup),
+      "spieltag_nummer": spieltag,
+
         "Datum": extract_datum(soup),
         
         "time": time_div.get_text(strip=True) if time_div else "",
