@@ -150,13 +150,12 @@ def extract_game_details(html):
     return {
         "spieltag_nummer": extract_spieltag(soup),
         "Datum": extract_datum(soup),
+        
         "time": time_div.get_text(strip=True) if time_div else "",
         "heim": heim.get_text(strip=True) if heim else "",
         "gast": gast.get_text(strip=True) if gast else "",
         "score": score_div.get_text(strip=True) if score_div else "n/a"
     }
-
-
 def extract_game_plan_details(html):
     data = extract_game_details(html)
     data["score"] = "n/a"
@@ -176,6 +175,7 @@ def extract_datum(soup):
     if not h:
         return None
     m = re.search(r"(\d{2}\.\d{2}\.\d{4})", h.text)
+    print("📅 Gefundenes Datum:", m.group(1) if m else "Keins")
     return m.group(1) if m else None
 
 
@@ -183,6 +183,7 @@ def extract_datum(soup):
 # DB INSERT
 # =========================
 def eintrag_db(cur, conn, results):
+
     for g in results:
         cur.execute("""
             INSERT INTO spiele_web (spieltag, datum, zeit, heimverein, gastverein, score)
