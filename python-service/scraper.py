@@ -163,17 +163,15 @@ def extract_game_plan_details(html):
 
 
 def extract_spieltag(soup):
-    h = soup.find("h3")
-    if not h:
-        return None
-    m = re.search(r"(\d+)\.\s*Spieltag", h.text)
-    return m.group(1) if m else None
-
+    headline_roh = soup.find("h3",class_="hs-scoreboard-headline")
+    spieltag_match = re.search(r"(\d+)\.\s*Spieltag", headline_roh.text) if headline_roh else None
+    spieltag_nummer = spieltag_match.group(1) if spieltag_match else "Nicht gefunden"
+    return spieltag_nummer
 
 def extract_datum(soup):
     headline_roh = soup.find("h3",class_="hs-scoreboard-headline")
     datum_match = re.search(r"(\d{2}\.\d{2}\.\d{4})", headline_roh.text) if headline_roh else None
-    print("📅 Gefundenes Datum headline:", datum_match.group(1) if datum_match else "Keins")
+    # print("📅 Gefundenes Datum headline:", datum_match.group(1) if datum_match else "Keins")
     return datum_match.group(1) if datum_match else None
 
 
