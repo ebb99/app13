@@ -171,12 +171,10 @@ def extract_spieltag(soup):
 
 
 def extract_datum(soup):
-    h = soup.find("h3")
-    if not h:
-        return None
-    m = re.search(r"(\d{2}\.\d{2}\.\d{4})", h.text)
-    print("📅 Gefundenes Datum:", m.group(1) if m else "Keins")
-    return m.group(1) if m else None
+    headline_roh = soup.find("h3",class_="hs-scoreboard-headline")
+    datum_match = re.search(r"(\d{2}\.\d{2}\.\d{4})", headline_roh.text) if headline_roh else None
+    print("📅 Gefundenes Datum headline:", datum_match.group(1) if datum_match else "Keins")
+    return datum_match.group(1) if datum_match else None
 
 
 # =========================
