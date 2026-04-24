@@ -1,11 +1,19 @@
 import os
 import psycopg2
+import logging
+import time
+import re
+from datetime import date, timedelta
 from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
-import re
-import time
-from datetime import date, timedelta
 
+# =========================
+# LOGGING
+# =========================
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
 
 # =========================
 # DB VERBINDUNG
@@ -13,30 +21,44 @@ from datetime import date, timedelta
 def get_connection():
     db_url = os.environ.get("DATABASE_URL")
     if not db_url:
-        raise Exception("❌ DATABASE_URL fehlt")
+        raise Exception("DATABASE_URL fehlt")
     return psycopg2.connect(db_url, sslmode="require")
+
+
+# =========================
+# SICHERES PAGE LOAD
+# =========================
+def safe_goto(page, url, retries=5):
+    for attempt in range(retries):
+        try:
+            page.goto(url, timeout=15000)
+            page.wait_for_load_state("domcontentloaded")
+            return True
+
+        except Exception as e:
+            logging.warning(f"Fehler bei {url} (Versuch {attempt+1}): {e}")
+            time.sleep(2 * (attempt + 1))
+
+    logging.error(f"Seite endgültig fehlgeschlagen: {url}")
+    return False
 
 
 # =========================
 # MAIN SCRAPER
 # =========================
-def run_scraper(job_id=None, jobs=None):
-    print("🚀 Scraper gestartet")
+def run_scraper():
+    logging.info("🚀 Scraper gestartet")
 
     try:
         conn = get_connection()
         cur = conn.cursor()
 
-        # Test
         cur.execute("SELECT 1;")
-        print("DB OK:", cur.fetchone())
+        logging.info(f"DB OK: {cur.fetchone()}")
 
-        # Tabelle leeren
         cur.execute("TRUNCATE TABLE spiele_web RESTART IDENTITY")
         conn.commit()
-        print("🧹 Tabelle geleert")
 
-        # Zeitraum bestimmen
         heute = date.today()
         dat1 = heute - timedelta(days=8)
         dat2 = heute + timedelta(days=8)
@@ -48,74 +70,86 @@ def run_scraper(job_id=None, jobs=None):
         """, (dat1, dat2))
 
         min_tag, max_tag = cur.fetchone()
-        print(f"📅 Spieltage: {min_tag} - {max_tag}")
 
         if not min_tag or not max_tag:
-            print("❌ Keine Spieltage gefunden")
+            logging.warning("Keine Spieltage gefunden")
             return
 
-        # Daten holen
         daten_holen(cur, conn, int(min_tag), int(max_tag))
 
-        cur.close()
-        conn.close()
-
-        print("✅ Scraper fertig")
-
     except Exception as e:
-        print("❌ SCRAPER ERROR:", e)
+        logging.exception("SCRAPER ERROR")
+
+    finally:
+        try:
+            cur.close()
+            conn.close()
+        except:
+            pass
+
+    logging.info("✅ Scraper fertig")
 
 
 # =========================
 # DATEN HOLEN
 # =========================
 def daten_holen(cur, conn, von, bis):
-    from playwright.sync_api import sync_playwright
+
     base = "https://www.sportschau.de/live-und-ergebnisse/fussball/deutschland-bundesliga/se94724/2025-2026/ro262400/spieltag/md"
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        page = browser.new_page()
+        browser = p.chromium.launch(
+            headless=True,
+            args=["--no-sandbox", "--disable-dev-shm-usage"]
+        )
+
+        page = browser.new_page(
+            user_agent="Mozilla/5.0"
+        )
 
         for spieltag in range(von, bis + 1):
             url = f"{base}{spieltag}/spiele-und-ergebnisse"
-            print(f"🌐 Lade Spieltag {spieltag}")
+            logging.info(f"🌐 Spieltag {spieltag}")
 
-            page.goto(url)
-            page.wait_for_timeout(2000)
+            if not safe_goto(page, url):
+                continue
 
             html = page.content()
 
             game_links = extract_links(html, "liveticker")
             plan_links = extract_links(html, "info")
 
-            print(f"🔗 {len(game_links)} Spiele, {len(plan_links)} Plan")
+            logging.info(f"{len(game_links)} Spiele / {len(plan_links)} Plan")
 
-            # Ergebnisse
-            results = []
-            for link in game_links:
-                page.goto(link)
-                page.wait_for_timeout(3000)
-                data = extract_game_details(page.content())
-                results.append(data)
-
-            eintrag_db(cur, conn, results)
-
-            # Spielplan
-            results = []
-            for link in plan_links:
-                page.goto(link)
-                page.wait_for_timeout(3000)
-                data = extract_game_plan_details(page.content())
-                results.append(data)
-
-            eintrag_db(cur, conn, results)
+            scrape_links(page, game_links, cur, conn, extract_game_details)
+            scrape_links(page, plan_links, cur, conn, extract_game_plan_details)
 
         browser.close()
 
 
 # =========================
-# LINKS EXTRAHIEREN
+# GENERISCHE SCRAPE FUNKTION
+# =========================
+def scrape_links(page, links, cur, conn, extractor):
+    results = []
+
+    for link in links:
+        if not safe_goto(page, link):
+            continue
+
+        try:
+            page.wait_for_selector("div.match-time", timeout=10000)
+            data = extractor(page.content())
+            results.append(data)
+
+        except Exception as e:
+            logging.warning(f"Parsing Fehler bei {link}: {e}")
+
+    eintrag_db(cur, conn, results)
+
+
+# =========================
+# LINKS
 # =========================
 def extract_links(html, typ):
     soup = BeautifulSoup(html, "html.parser")
@@ -137,75 +171,44 @@ def extract_links(html, typ):
 
 
 # =========================
-# DETAILS
+# PARSER
 # =========================
 def extract_game_details(html):
     soup = BeautifulSoup(html, "html.parser")
 
     heim = soup.select_one("div.team-shortname-home")
-    print ("🏠 Heimteam :", heim.get_text(strip=True) if heim else "Keins")
     gast = soup.select_one("div.team-shortname-away")
     time_div = soup.select_one("div.match-time")
     score_div = soup.select_one("div.match-result")
-    kennung = extract_datum(soup)  + "_" + (heim.get_text(strip=True) if heim else "n/a") + "_"+ (gast.get_text(strip=True) if gast else "n/a")
+
+    datum = extract_datum(soup)
+
     return {
         "spieltag_nummer": extract_spieltag(soup),
-        "Datum": extract_datum(soup),
+        "Datum": datum,
         "time": time_div.get_text(strip=True) if time_div else "",
         "heim": heim.get_text(strip=True) if heim else "",
         "gast": gast.get_text(strip=True) if gast else "",
         "score": score_div.get_text(strip=True) if score_div else "n/a",
-        "kennung": kennung
+        "kennung": f"{datum}_{heim.get_text(strip=True) if heim else 'n/a'}_{gast.get_text(strip=True) if gast else 'n/a'}"
     }
+
 
 def extract_game_plan_details(html):
-    soup = BeautifulSoup(html, "html.parser")
-
-    heim = soup.select_one("div.team-shortname-home")
-    gast = soup.select_one("div.team-shortname-away")
-    time_div = soup.select_one("div.match-time")
-    score_div = soup.select_one("div.match-result")
-    kennung = extract_datum(soup)  + "_" + (heim.get_text(strip=True) if heim else "n/a") + "_"+ (gast.get_text(strip=True) if gast else "n/a")
-    return {
-        "spieltag_nummer": extract_spieltag(soup),
-        "Datum": extract_datum(soup),
-        "time": time_div.get_text(strip=True) if time_div else "",
-        "heim": heim.get_text(strip=True) if heim else "",
-        "gast": gast.get_text(strip=True) if gast else "",
-        "score": score_div.get_text(strip=True) if score_div else "n/a",
-        "kennung": kennung
-    }
-
-
-
-
-
-
-
-# def extract_game_plan_details(html):
-#     data = extract_game_details(html)
-#     data["score"] = "n/a"
-#     return data
-
-
+    return extract_game_details(html)
 
 
 def extract_spieltag(soup):
-    headline_roh = soup.find("h3",class_="hs-scoreboard-headline")
-    spieltag_match = re.search(r"(\d+)\.\s*Spieltag", headline_roh.text) if headline_roh else None
-    spieltag_nummer = spieltag_match.group(1) if spieltag_match else "Nicht gefunden"
-    return spieltag_nummer
+    h = soup.find("h3", class_="hs-scoreboard-headline")
+    m = re.search(r"(\d+)\.\s*Spieltag", h.text) if h else None
+    return m.group(1) if m else None
+
 
 def extract_datum(soup):
-    headline_roh = soup.find("h3",class_="hs-scoreboard-headline")
-    datum_match = re.search(r"(\d{2}\.\d{2}\.\d{4})", headline_roh.text) if headline_roh else None
-    # print("📅 Gefundenes Datum headline:", datum_match.group(1) if datum_match else "Keins")
-    return datum_match.group(1) if datum_match else None
-def extract_time(soup):
-    headline_roh = soup.find("h3",class_="hs-scoreboard-headline")
-    time_match = re.search(r"(\d{2}:\d{2})", headline_roh.text) if headline_roh else None
-    # print("⏰ Gefundene Uhrzeit headline:", time_match.group(1) if time_match else "Keine")
-    return time_match.group(1) if time_match else None
+    h = soup.find("h3", class_="hs-scoreboard-headline")
+    m = re.search(r"(\d{2}\.\d{2}\.\d{4})", h.text) if h else None
+    return m.group(1) if m else None
+
 
 # =========================
 # DB INSERT
@@ -213,18 +216,23 @@ def extract_time(soup):
 def eintrag_db(cur, conn, results):
 
     for g in results:
-        # print (f"💾 Eintrag: {g['spieltag_nummer']} - {g['Datum']} - {g['heim']} vs {g['gast']} - {g['score']}")
-        cur.execute("""
-            INSERT INTO spiele_web (spieltag, datum, zeit, heimverein, gastverein, score,kennung)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """, (
-            g["spieltag_nummer"],
-            g["Datum"],
-            g["time"],
-            g["heim"],
-            g["gast"],
-            g["score"],
-            g["kennung"]
-        ))
+        try:
+            cur.execute("""
+                INSERT INTO spiele_web
+                (spieltag, datum, zeit, heimverein, gastverein, score, kennung)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (
+                g["spieltag_nummer"],
+                g["Datum"],
+                g["time"],
+                g["heim"],
+                g["gast"],
+                g["score"],
+                g["kennung"]
+            ))
+
+        except Exception as e:
+            logging.error(f"DB Fehler: {e}")
+            conn.rollback()
 
     conn.commit()

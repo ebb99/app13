@@ -71,13 +71,6 @@ async function runPython() {
         const res = await fetch("https://amusing-heart-production-4bf6.up.railway.app/run-job", {
             method: "POST"
         });
-
-
-
-
-
-
-
         console.log(res.status);
 
         const data = await res.json();
