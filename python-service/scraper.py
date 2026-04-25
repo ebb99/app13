@@ -139,6 +139,11 @@ def eintrag_db(cur, conn, results):
                 INSERT INTO spiele_web
                 (spieltag, datum, zeit, heimverein, gastverein, score, kennung)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (kennung)
+                DO UPDATE SET
+                    score = EXCLUDED.score,
+                    zeit = EXCLUDED.zeit
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (
                 g["spieltag_nummer"],
                 g["Datum"],
