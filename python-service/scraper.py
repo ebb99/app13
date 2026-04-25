@@ -60,8 +60,8 @@ def run_scraper():
         conn.commit()
 
         heute = date.today()
-        dat1 = heute - timedelta(days=8)
-        dat2 = heute + timedelta(days=8)
+        dat1 = heute - timedelta(days=10)
+        dat2 = heute + timedelta(days=10)
 
         cur.execute("""
             SELECT MIN(spieltag), MAX(spieltag)
