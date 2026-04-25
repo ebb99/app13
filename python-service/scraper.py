@@ -165,6 +165,7 @@ def run_scraper():
         dat1 = heute - timedelta(days=10)
         dat2 = heute + timedelta(days=10)
 
+
         cur.execute("""
             SELECT MIN(spieltag), MAX(spieltag)
             FROM spielplan
