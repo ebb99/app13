@@ -195,7 +195,10 @@ def extract_game_details(html):
 
 
 def extract_game_plan_details(html):
-    return extract_game_details(html)
+        data = extract_game_details(html)
+        data["score"] = "n/a"
+        return data
+   
 
 
 def extract_spieltag(soup):
