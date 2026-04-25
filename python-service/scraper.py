@@ -138,7 +138,8 @@ def scrape_links(page, links, cur, conn, extractor):
             continue
 
         try:
-            page.wait_for_selector("div.match-time", timeout=10000)
+            # page.wait_for_selector("div.match-time", timeout=10000)
+            page.wait_for_load_state("networkidle")
             data = extractor(page.content())
             results.append(data)
 
