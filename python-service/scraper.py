@@ -3,18 +3,18 @@ import psycopg2
 import logging
 import time
 import re
+import requests
 from datetime import date, timedelta
-from concurrent.futures import ThreadPoolExecutor, as_completed
-
-from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 
 # =========================
 # CONFIG
 # =========================
-MAX_WORKERS = 5
-RETRIES = 4
-DEBUG = False
+HEADERS = {
+    "User-Agent": "Mozilla/5.0"
+}
+
+RETRIES = 5
 
 # =========================
 # LOGGING
@@ -28,29 +28,32 @@ logging.basicConfig(
 # DB
 # =========================
 def get_connection():
-    db_url = os.environ.get("DATABASE_URL")
-    if not db_url:
-        raise Exception("DATABASE_URL fehlt")
-    return psycopg2.connect(db_url, sslmode="require")
+    return psycopg2.connect(os.environ["DATABASE_URL"], sslmode="require")
 
 
 # =========================
-# SAFE GOTO
+# HTTP REQUEST MIT RETRY
 # =========================
-def safe_goto(page, url):
+def fetch(url):
     for attempt in range(RETRIES):
         try:
-            page.goto(url, timeout=20000)
-            page.wait_for_load_state("networkidle")
-            return True
+            r = requests.get(url, headers=HEADERS, timeout=20)
+
+            if r.status_code == 200:
+                return r.text
+
+            logging.warning(f"Status {r.status_code} bei {url}")
+
         except Exception as e:
-            logging.warning(f"GOTO Fehler {attempt+1}: {url}")
-            time.sleep(2 * (attempt + 1))
-    return False
+            logging.warning(f"Fetch Fehler {attempt+1}: {url} -> {e}")
+
+        time.sleep(2 * (attempt + 1))
+
+    return None
 
 
 # =========================
-# LINK EXTRACTOR
+# LINKS
 # =========================
 def extract_links(html, typ):
     soup = BeautifulSoup(html, "html.parser")
@@ -117,54 +120,6 @@ def extract_game(html):
 
 
 # =========================
-# EINZELNER LINK SCRAPER
-# =========================
-def scrape_single(context, link):
-    page = context.new_page()
-
-    try:
-        if not safe_goto(page, link):
-            return None
-
-        html = page.content()
-
-        if "team-shortname-home" not in html:
-            time.sleep(1)
-            html = page.content()
-
-        data = extract_game(html)
-
-        if not data["heim"] or not data["gast"]:
-            return None
-
-        return data
-
-    except Exception as e:
-        logging.warning(f"Fehler bei {link}: {e}")
-        return None
-
-    finally:
-        page.close()
-
-
-# =========================
-# PARALLELES SCRAPING
-# =========================
-def scrape_links_parallel(context, links):
-    results = []
-
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        futures = [executor.submit(scrape_single, context, link) for link in links]
-
-        for future in as_completed(futures):
-            data = future.result()
-            if data:
-                results.append(data)
-
-    return results
-
-
-# =========================
 # DB UPSERT
 # =========================
 def eintrag_db(cur, conn, results):
@@ -197,7 +152,7 @@ def eintrag_db(cur, conn, results):
 
 
 # =========================
-# MAIN LOGIK
+# MAIN SCRAPER
 # =========================
 def run_scraper():
     logging.info("🚀 Scraper gestartet")
@@ -206,9 +161,6 @@ def run_scraper():
     cur = conn.cursor()
 
     try:
-        cur.execute("TRUNCATE TABLE spiele_web RESTART IDENTITY")
-        conn.commit()
-
         heute = date.today()
         dat1 = heute - timedelta(days=10)
         dat2 = heute + timedelta(days=10)
@@ -227,40 +179,38 @@ def run_scraper():
 
         base = "https://www.sportschau.de/live-und-ergebnisse/fussball/deutschland-bundesliga/se94724/2025-2026/ro262400/spieltag/md"
 
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            context = browser.new_context(user_agent="Mozilla/5.0")
+        for spieltag in range(int(min_tag), int(max_tag) + 1):
 
-            page = context.new_page()
+            url = f"{base}{spieltag}/spiele-und-ergebnisse"
+            logging.info(f"🌐 Spieltag {spieltag}")
 
-            for spieltag in range(int(min_tag), int(max_tag) + 1):
-                url = f"{base}{spieltag}/spiele-und-ergebnisse"
+            html = fetch(url)
 
-                logging.info(f"🌐 Spieltag {spieltag}")
+            if not html:
+                logging.warning(f"❌ Kein HTML für Spieltag {spieltag}")
+                continue
 
-                if not safe_goto(page, url):
+            game_links = extract_links(html, "liveticker")
+
+            if not game_links:
+                logging.warning(f"❌ Keine Spiele gefunden: {spieltag}")
+                continue
+
+            results = []
+
+            for link in game_links:
+                game_html = fetch(link)
+
+                if not game_html:
                     continue
 
-                html = page.content()
+                data = extract_game(game_html)
 
-                if DEBUG and spieltag == 30:
-                    with open("debug30.html", "w", encoding="utf-8") as f:
-                        f.write(html)
+                if data["heim"] and data["gast"]:
+                    results.append(data)
 
-                game_links = extract_links(html, "liveticker")
-
-                if not game_links:
-                    logging.warning(f"Keine Links gefunden: {spieltag}")
-                    continue
-
-                logging.info(f"{len(game_links)} Spiele gefunden")
-
-                results = scrape_links_parallel(context, game_links)
-
-                if results:
-                    eintrag_db(cur, conn, results)
-
-            browser.close()
+            if results:
+                eintrag_db(cur, conn, results)
 
     except Exception:
         logging.exception("SCRAPER ERROR")
@@ -270,10 +220,3 @@ def run_scraper():
         conn.close()
 
     logging.info("✅ Scraper fertig")
-
-
-# =========================
-# ENTRY
-# =========================
-if __name__ == "__main__":
-    run_scraper()
