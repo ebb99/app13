@@ -4,8 +4,17 @@ import logging
 import time
 import re
 from datetime import date, timedelta
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
+
+# =========================
+# CONFIG
+# =========================
+MAX_WORKERS = 5
+RETRIES = 4
+DEBUG = False
 
 # =========================
 # LOGGING
@@ -16,7 +25,7 @@ logging.basicConfig(
 )
 
 # =========================
-# DB VERBINDUNG
+# DB
 # =========================
 def get_connection():
     db_url = os.environ.get("DATABASE_URL")
@@ -26,131 +35,22 @@ def get_connection():
 
 
 # =========================
-# SICHERES PAGE LOAD
+# SAFE GOTO
 # =========================
-def safe_goto(page, url, retries=5):
-    for attempt in range(retries):
+def safe_goto(page, url):
+    for attempt in range(RETRIES):
         try:
-            page.goto(url, timeout=15000)
-            page.wait_for_load_state("domcontentloaded")
+            page.goto(url, timeout=20000)
+            page.wait_for_load_state("networkidle")
             return True
-
         except Exception as e:
-            logging.warning(f"Fehler bei {url} (Versuch {attempt+1}): {e}")
+            logging.warning(f"GOTO Fehler {attempt+1}: {url}")
             time.sleep(2 * (attempt + 1))
-
-    logging.error(f"Seite endgültig fehlgeschlagen: {url}")
     return False
 
 
 # =========================
-# MAIN SCRAPER
-# =========================
-def run_scraper():
-    logging.info("🚀 Scraper gestartet")
-
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-
-        cur.execute("SELECT 1;")
-        logging.info(f"DB OK: {cur.fetchone()}")
-
-        cur.execute("TRUNCATE TABLE spiele_web RESTART IDENTITY")
-        conn.commit()
-
-        heute = date.today()
-        dat1 = heute - timedelta(days=10)
-        dat2 = heute + timedelta(days=10)
-
-        cur.execute("""
-            SELECT MIN(spieltag), MAX(spieltag)
-            FROM spielplan
-            WHERE datum > %s AND datum < %s
-        """, (dat1, dat2))
-
-        min_tag, max_tag = cur.fetchone()
-
-        if not min_tag or not max_tag:
-            logging.warning("Keine Spieltage gefunden")
-            return
-
-        daten_holen(cur, conn, int(min_tag), int(max_tag))
-
-    except Exception as e:
-        logging.exception("SCRAPER ERROR")
-
-    finally:
-        try:
-            cur.close()
-            conn.close()
-        except:
-            pass
-
-    logging.info("✅ Scraper fertig")
-
-
-# =========================
-# DATEN HOLEN
-# =========================
-def daten_holen(cur, conn, von, bis):
-
-    base = "https://www.sportschau.de/live-und-ergebnisse/fussball/deutschland-bundesliga/se94724/2025-2026/ro262400/spieltag/md"
-
-    with sync_playwright() as p:
-        browser = p.chromium.launch(
-            headless=True,
-            args=["--no-sandbox", "--disable-dev-shm-usage"]
-        )
-
-        page = browser.new_page(
-            user_agent="Mozilla/5.0"
-        )
-
-        for spieltag in range(von, bis + 1):
-            url = f"{base}{spieltag}/spiele-und-ergebnisse"
-            logging.info(f"🌐 Spieltag {spieltag}")
-
-            if not safe_goto(page, url):
-                continue
-
-            html = page.content()
-
-            game_links = extract_links(html, "liveticker")
-            plan_links = extract_links(html, "info")
-
-            logging.info(f"{len(game_links)} Spiele / {len(plan_links)} Plan")
-
-            scrape_links(page, game_links, cur, conn, extract_game_details)
-            scrape_links(page, plan_links, cur, conn, extract_game_plan_details)
-
-        browser.close()
-
-
-# =========================
-# GENERISCHE SCRAPE FUNKTION
-# =========================
-def scrape_links(page, links, cur, conn, extractor):
-    results = []
-
-    for link in links:
-        if not safe_goto(page, link):
-            continue
-
-        try:
-            # page.wait_for_selector("div.match-time", timeout=10000)
-            page.wait_for_load_state("networkidle")
-            data = extractor(page.content())
-            results.append(data)
-
-        except Exception as e:
-            logging.warning(f"Parsing Fehler bei {link}: {e}")
-
-    eintrag_db(cur, conn, results)
-
-
-# =========================
-# LINKS
+# LINK EXTRACTOR
 # =========================
 def extract_links(html, typ):
     soup = BeautifulSoup(html, "html.parser")
@@ -174,32 +74,9 @@ def extract_links(html, typ):
 # =========================
 # PARSER
 # =========================
-def extract_game_details(html):
-    soup = BeautifulSoup(html, "html.parser")
-
-    heim = soup.select_one("div.team-shortname-home")
-    gast = soup.select_one("div.team-shortname-away")
-    time_div = soup.select_one("div.match-time")
-    score_div = soup.select_one("div.match-result")
-
-    datum = extract_datum(soup)
-
-    return {
-        "spieltag_nummer": extract_spieltag(soup),
-        "Datum": datum,
-        "time": time_div.get_text(strip=True) if time_div else "",
-        "heim": heim.get_text(strip=True) if heim else "",
-        "gast": gast.get_text(strip=True) if gast else "",
-        "score": score_div.get_text(strip=True) if score_div else "n/a",
-        "kennung": f"{datum}_{heim.get_text(strip=True) if heim else 'n/a'}_{gast.get_text(strip=True) if gast else 'n/a'}"
-    }
-
-
-def extract_game_plan_details(html):
-        data = extract_game_details(html)
-        data["score"] = "n/a"
-        return data
-   
+def extract_text(soup, selector):
+    el = soup.select_one(selector)
+    return el.get_text(strip=True) if el else ""
 
 
 def extract_spieltag(soup):
@@ -214,8 +91,81 @@ def extract_datum(soup):
     return m.group(1) if m else None
 
 
+def extract_game(html):
+    soup = BeautifulSoup(html, "html.parser")
+
+    heim = extract_text(soup, "div.team-shortname-home")
+    gast = extract_text(soup, "div.team-shortname-away")
+    zeit = extract_text(soup, "div.match-time")
+    score = extract_text(soup, "div.match-result")
+
+    datum = extract_datum(soup)
+    spieltag = extract_spieltag(soup)
+
+    if not score:
+        score = "n/a"
+
+    return {
+        "spieltag_nummer": spieltag,
+        "Datum": datum,
+        "time": zeit,
+        "heim": heim,
+        "gast": gast,
+        "score": score,
+        "kennung": f"{datum}_{heim}_{gast}"
+    }
+
+
 # =========================
-# DB INSERT
+# EINZELNER LINK SCRAPER
+# =========================
+def scrape_single(context, link):
+    page = context.new_page()
+
+    try:
+        if not safe_goto(page, link):
+            return None
+
+        html = page.content()
+
+        if "team-shortname-home" not in html:
+            time.sleep(1)
+            html = page.content()
+
+        data = extract_game(html)
+
+        if not data["heim"] or not data["gast"]:
+            return None
+
+        return data
+
+    except Exception as e:
+        logging.warning(f"Fehler bei {link}: {e}")
+        return None
+
+    finally:
+        page.close()
+
+
+# =========================
+# PARALLELES SCRAPING
+# =========================
+def scrape_links_parallel(context, links):
+    results = []
+
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        futures = [executor.submit(scrape_single, context, link) for link in links]
+
+        for future in as_completed(futures):
+            data = future.result()
+            if data:
+                results.append(data)
+
+    return results
+
+
+# =========================
+# DB UPSERT
 # =========================
 def eintrag_db(cur, conn, results):
 
@@ -225,6 +175,10 @@ def eintrag_db(cur, conn, results):
                 INSERT INTO spiele_web
                 (spieltag, datum, zeit, heimverein, gastverein, score, kennung)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (kennung)
+                DO UPDATE SET
+                    score = EXCLUDED.score,
+                    zeit = EXCLUDED.zeit
             """, (
                 g["spieltag_nummer"],
                 g["Datum"],
@@ -240,3 +194,86 @@ def eintrag_db(cur, conn, results):
             conn.rollback()
 
     conn.commit()
+
+
+# =========================
+# MAIN LOGIK
+# =========================
+def run_scraper():
+    logging.info("🚀 Scraper gestartet")
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    try:
+        cur.execute("TRUNCATE TABLE spiele_web RESTART IDENTITY")
+        conn.commit()
+
+        heute = date.today()
+        dat1 = heute - timedelta(days=10)
+        dat2 = heute + timedelta(days=10)
+
+        cur.execute("""
+            SELECT MIN(spieltag), MAX(spieltag)
+            FROM spielplan
+            WHERE datum > %s AND datum < %s
+        """, (dat1, dat2))
+
+        min_tag, max_tag = cur.fetchone()
+
+        if not min_tag or not max_tag:
+            logging.warning("Keine Spieltage gefunden")
+            return
+
+        base = "https://www.sportschau.de/live-und-ergebnisse/fussball/deutschland-bundesliga/se94724/2025-2026/ro262400/spieltag/md"
+
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context(user_agent="Mozilla/5.0")
+
+            page = context.new_page()
+
+            for spieltag in range(int(min_tag), int(max_tag) + 1):
+                url = f"{base}{spieltag}/spiele-und-ergebnisse"
+
+                logging.info(f"🌐 Spieltag {spieltag}")
+
+                if not safe_goto(page, url):
+                    continue
+
+                html = page.content()
+
+                if DEBUG and spieltag == 30:
+                    with open("debug30.html", "w", encoding="utf-8") as f:
+                        f.write(html)
+
+                game_links = extract_links(html, "liveticker")
+
+                if not game_links:
+                    logging.warning(f"Keine Links gefunden: {spieltag}")
+                    continue
+
+                logging.info(f"{len(game_links)} Spiele gefunden")
+
+                results = scrape_links_parallel(context, game_links)
+
+                if results:
+                    eintrag_db(cur, conn, results)
+
+            browser.close()
+
+    except Exception:
+        logging.exception("SCRAPER ERROR")
+
+    finally:
+        cur.close()
+        conn.close()
+
+    logging.info("✅ Scraper fertig")
+
+
+# =========================
+# ENTRY
+# =========================
+if __name__ == "__main__":
+    run_scraper()
